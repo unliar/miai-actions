@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: HAPPYREPO
+spec:
+  selector:
+    matchLabels:
+      app: HAPPYREPO
+  replicas: 1
+  minReadySeconds: 10 # 最短应用就绪时间 pod 启动10s后才认为应用可以接受请求。
+  strategy:
+    type: RollingUpdate # 滚动更新
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: HAPPYREPO
+    spec:
+      containers:
+        - name: HAPPYREPO
+          image: HAPPYIMAGE
+          ports:
+            - containerPort: 8088
+          resources:
+            requests: # 资源分配下限
+              cpu: "20m"
+              memory: "50Mi"
+            limits: # 资源分配上限
+              memory: "128Mi" # 内存限制
+              cpu: "500m" # 限制cpu
+          env:
+            - name: DOOR_ENV
+              value: "DOOR_ENV_VALUE"
+            - name: MICRO_REGISTRY
+              value: "consul"
+            - name: MICRO_REGISTRY_ADDRESS
+              value: "happy-consul"
+            - name: MICRO_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - "-c"
+                  - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=✅%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务启动" || true
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - "-c"
+                  - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=❌%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务移除" || true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: HAPPYREPO #Service 的名称
+  labels: #Service 自己的标签
+    app: HAPPYREPO #为该 Service 设置 key 为 app，value 为 nginx 的标签
+spec: #这是关于该 Service 的定义，描述了 Service 如何选择 Pod，如何被访问
+  selector: #标签选择器
+    app: HAPPYREPO #选择包含标签 app:nginx 的 Pod
+  ports:
+    - name: wow #端口的名字
+      protocol: TCP #协议类型 TCP/UDP
+      port: 80 #集群内的其他容器组可通过 80 端口访问 Service
