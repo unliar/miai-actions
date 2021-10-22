@@ -1,6 +1,6 @@
 # 小爱同学语音联动
 
-> 项目使用了 [巴法)(https://bemfa.com) MQTT 服务
+> 项目使用了 [巴法](https://bemfa.com) MQTT 服务
 
 ## 联动小爱同学原理
 
