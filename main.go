@@ -61,11 +61,11 @@ func main() {
 			return
 		}
 		fmt.Printf("收到其他指令消息:" + payload)
-	})
+	}).Wait()
 
-	time.AfterFunc(25*time.Second, func() {
-		client.Publish(env.Topic, 0, false, "ping\r\n")
-	})
+	//time.AfterFunc(25*time.Second, func() {
+	//	client.Publish(env.Topic, 0, false, "ping\r\n")
+	//})
 
 	c := make(chan os.Signal)
 	s := <-c
