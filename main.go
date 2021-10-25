@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"miai-open-the-door/actions"
 	"os"
 	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 const server = "bemfa.com"
@@ -60,6 +61,10 @@ func main() {
 			return
 		}
 		fmt.Printf("收到其他指令消息:" + payload)
+	})
+
+	time.AfterFunc(25*time.Second, func() {
+		client.Publish(env.Topic, 0, false, "ping\r\n")
 	})
 
 	c := make(chan os.Signal)
