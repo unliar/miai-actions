@@ -66,7 +66,12 @@ func main() {
 	//time.AfterFunc(25*time.Second, func() {
 	//	client.Publish(env.Topic, 0, false, "ping\r\n")
 	//})
-
+	ticker := time.NewTicker(25 * time.Second)
+	go func() {
+		for range ticker.C {
+			client.Publish(env.Topic, 0, false, "ping\r\n")
+		}
+	}()
 	c := make(chan os.Signal)
 	s := <-c
 	fmt.Println("退出", s)
