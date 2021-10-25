@@ -26,6 +26,7 @@ func main() {
 	// 超时时间配置
 	opts.ConnectTimeout = 5 * time.Second
 	opts.AutoReconnect = true
+	opts.KeepAlive = 60
 	opts.OnReconnecting = func(client mqtt.Client, options *mqtt.ClientOptions) {
 		fmt.Printf("重连mqtt服务 \n")
 	}
@@ -66,12 +67,12 @@ func main() {
 	//time.AfterFunc(25*time.Second, func() {
 	//	client.Publish(env.Topic, 0, false, "ping\r\n")
 	//})
-	ticker := time.NewTicker(25 * time.Second)
-	go func() {
-		for range ticker.C {
-			client.Publish(env.Topic, 0, false, "ping\r\n")
-		}
-	}()
+	//ticker := time.NewTicker(25 * time.Second)
+	//go func() {
+	//	for range ticker.C {
+	//		client.Publish(env.Topic, 0, false, "ping\r\n")
+	//	}
+	//}()
 	c := make(chan os.Signal)
 	s := <-c
 	fmt.Println("退出", s)
