@@ -12,6 +12,29 @@ import (
 const server = "bemfa.com"
 const port = 9501
 
+// 订阅消息
+func sub(client mqtt.Client, env *DoorEnv) {
+	if token := client.Subscribe(env.Topic, 0, func(client mqtt.Client, message mqtt.Message) {
+		payload := string(message.Payload())
+		fmt.Printf("From - Topic: %s\n", message.Topic())
+		fmt.Printf("MSG - Payload: %s\n", payload)
+		if payload == "on" {
+			fmt.Println("开门指令触发")
+			actions.OpenTheDoor(env.OpenDoorRequest)
+			return
+		}
+		if payload == "off" {
+			fmt.Println("关门指令触发")
+			return
+		}
+		fmt.Printf("收到其他指令消息:" + payload)
+	}); token.Wait() && token.Error() != nil {
+		fmt.Println("订阅失败")
+		panic(token.Error())
+	}
+	fmt.Println("订阅成功")
+}
+
 func main() {
 	// 获取配置
 	env, err := GetDoorEnv()
@@ -28,15 +51,17 @@ func main() {
 	opts.AutoReconnect = true
 	opts.KeepAlive = 60
 	opts.OnReconnecting = func(client mqtt.Client, options *mqtt.ClientOptions) {
-		fmt.Printf("重连mqtt服务 \n")
+		fmt.Printf("mqtt服务 重连... \n")
+		sub(client,env)
 	}
 	// 连接成功
 	opts.OnConnect = func(client mqtt.Client) {
-		fmt.Printf("连接成功 \n")
+		fmt.Printf("mqtt服务 连接成功 \n")
+		sub(client,env)
 	}
 	// 连接丢失
 	opts.OnConnectionLost = func(client mqtt.Client, err error) {
-		fmt.Printf("连接丢失: %v \n", err)
+		fmt.Printf("mqtt服务 连接丢失: %v \n", err)
 	}
 	opts.SetDefaultPublishHandler(func(client mqtt.Client, message mqtt.Message) {
 		fmt.Printf("TOPIC: %s\n", message.Topic())
@@ -47,32 +72,7 @@ func main() {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
-	// 订阅
-	client.Subscribe(env.Topic, 0, func(client mqtt.Client, message mqtt.Message) {
-		payload := string(message.Payload())
-		fmt.Printf("From - Topic: %s\n", message.Topic())
-		fmt.Printf("MSG - Payload: %s\n", payload)
-		if payload == "on" {
-			fmt.Println("开门指令触发")
-			actions.OpenTheDoor(env.OpenDoorRequest)
-			return
-		}
-		if payload == "off" {
-			fmt.Println("关门指令触发")
-			return
-		}
-		fmt.Printf("收到其他指令消息:" + payload)
-	}).Wait()
 
-	//time.AfterFunc(25*time.Second, func() {
-	//	client.Publish(env.Topic, 0, false, "ping\r\n")
-	//})
-	//ticker := time.NewTicker(25 * time.Second)
-	//go func() {
-	//	for range ticker.C {
-	//		client.Publish(env.Topic, 0, false, "ping\r\n")
-	//	}
-	//}()
 	c := make(chan os.Signal)
 	s := <-c
 	fmt.Println("退出", s)
