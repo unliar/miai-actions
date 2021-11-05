@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 )
@@ -25,7 +26,20 @@ type OpenDoorRequest struct {
 
 func OpenTheDoor(req OpenDoorRequest) {
 	client := resty.New()
+	// 重试次数
+	client.AddRetryCondition(func(response *resty.Response, err error) bool {
+		// 状态码异常
+		if response.StatusCode() > 200 {
+			return true
+		}
+		var r OpenDoorResponse
+		_ = json.Unmarshal(response.Body(), &r)
+		// 业务状态码异常
+		return r.Code != "000000"
+	}).SetRetryCount(2)
+
 	var res OpenDoorResponse
+
 	resp, err := client.R().
 		SetQueryParam("token", req.Token).
 		SetHeader("Accept", "application/json").
