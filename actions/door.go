@@ -33,7 +33,10 @@ func OpenTheDoor(req OpenDoorRequest) {
 			return true
 		}
 		var r OpenDoorResponse
-		_ = json.Unmarshal(response.Body(), &r)
+		err = json.Unmarshal(response.Body(), &r)
+		if err != nil {
+			return true
+		}
 		// 业务状态码异常
 		return r.Code != "000000"
 	}).SetRetryCount(2)
