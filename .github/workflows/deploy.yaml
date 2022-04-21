@@ -25,7 +25,7 @@ jobs:
           msg_type: text
           content: |
             text: |
-              🐳 构建状态 - From Github Action 
+              🐳 构建状态 - ${{ job.status }} 
               
               repository: https://github.com/${{ github.repository }}
 
@@ -33,7 +33,6 @@ jobs:
               
               compare: ${{ github.event.compare }}
 
-              job status: ${{ job.status }}
 
   deploy:
     needs: build
@@ -62,12 +61,10 @@ jobs:
           msg_type: text
           content: |
             text: |
-              ⭕️ 部署状态 - From Github Action 
+              ⭕️ 部署状态 - ${{ job.status }}
               
               repository: https://github.com/${{ github.repository }}
 
               committer: https://github.com/${{ github.actor }}
               
               compare: ${{ github.event.compare }}
-
-              job status: ${{ job.status }}
