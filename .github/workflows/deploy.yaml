@@ -17,28 +17,24 @@ jobs:
           registry: ${{ secrets.DOCKER_REGISTRY }}
           repository: "${{ github.repository }}"
           tags: "${{ github.sha }}"
-      - name: wechat-work-bot-success-build
-        uses: chf007/action-wechat-work@master
-        env:
-          WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
+      - name: feishu-bot-message
+        if: always()
+        uses: foxundermoon/feishu-action@v2
         with:
-          msgtype: markdown
-          content: "#### ✅ [构建容器成功](https://github.com/${{github.repository}}) \n
-          > registry: ${{ secrets.DOCKER_REGISTRY }} \n
-          > repo: ${{ github.repository }} \n
-          > tag: ${{ github.sha }} \n
-          > full: ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${{ github.sha }}
-          "
-      - name: wechat-work-bot-failed-build
-        if: ${{ failure() }}
-        uses: chf007/action-wechat-work@master
-        env:
-          WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
-        with:
-          msgtype: markdown
-          content: "#### ❎构建 ${{ github.event.repository.name }} 失败 \n
-          > link: [项目地址](https://github.com/${{github.repository}})   \n
-          "
+          url: ${{ secrets.FEISHU_BOT_WEBHOOK_URL }}
+          msg_type: text
+          content: |
+            text: |
+              🐳 构建状态 - From Github Action 
+              
+              repository: https://github.com/${{ github.repository }}
+
+              committer: https://github.com/${{ github.actor }}
+              
+              compare: ${{ github.event.compare }}
+
+              job status: ${{ job.status }}
+
   deploy:
     needs: build
     name: k8s-deploy
@@ -58,22 +54,20 @@ jobs:
         with:
           config: ${{ secrets.KUBE_CONFIG_DATA }}
           command: apply -f ./chart/config.yaml
-      - name: wechat-work-bot-success-deploy
-        if: ${{ success() }}
-        uses: chf007/action-wechat-work@master
-        env:
-          WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
+      - name: feishu-bot-message
+        if: always()
+        uses: foxundermoon/feishu-action@v2
         with:
-          msgtype: markdown
-          content: "#### ⭕正在滚动更新 ${{ github.event.repository.name }}\n
-          > link: [项目地址](https://github.com/${{github.repository}})   \n
-          "
-      - name: wechat-work-bot-failed-deploy
-        if: ${{ failure() }}
-        uses: chf007/action-wechat-work@master
-        env:
-          WECHAT_WORK_BOT_WEBHOOK: ${{secrets.WECHAT_WORK_BOT_WEBHOOK}}
-        with:
-          msgtype: markdown
-          content: "#### ❎k8s部署 ${{ github.event.repository.name }} 失败\n
-          > link: [项目地址](https://github.com/${{github.repository}})   \n"
+          url: ${{ secrets.FEISHU_BOT_WEBHOOK_URL }}
+          msg_type: text
+          content: |
+            text: |
+              ⭕️ 部署状态 - From Github Action 
+              
+              repository: https://github.com/${{ github.repository }}
+
+              committer: https://github.com/${{ github.actor }}
+              
+              compare: ${{ github.event.compare }}
+
+              job status: ${{ job.status }}
