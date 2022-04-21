@@ -37,8 +37,8 @@ func OpenTheDoor(req OpenDoorRequest) {
 		if err != nil {
 			return true
 		}
-		// 业务状态码异常
-		return r.Code != "000000"
+		// 业务状态码异常 非正常状态 是 4
+		return r.Result != "1"
 	}).SetRetryCount(2)
 
 	var res OpenDoorResponse
