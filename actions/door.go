@@ -40,7 +40,7 @@ func OpenTheDoor(req OpenDoorRequest) {
 		}
 		// 业务状态码异常 非正常状态 是 4
 		failed := r.Result != "1"
-		if failed {
+		if !failed {
 			_, _ = resty.New().R().
 				SetQueryParams(map[string]string{
 					"title": "❌ 小爱同学开门失败",
