@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"os"
 )
 
 type OpenDoorResponse struct {
@@ -38,7 +39,21 @@ func OpenTheDoor(req OpenDoorRequest) {
 			return true
 		}
 		// 业务状态码异常 非正常状态 是 4
-		return r.Result != "1"
+		failed := r.Result != "1"
+		if failed {
+			_, _ = resty.New().R().
+				SetQueryParams(map[string]string{
+					"title": "❌ 小爱同学开门失败",
+					"desc":  r.Message,
+					"type":  fmt.Sprintf("%d", 2|4|8),
+				}).
+				SetHeaders(map[string]string{
+					"Accept":       "application/json",
+					"Content-Type": "application/json",
+				}).
+				Get(os.Getenv("BOT_API"))
+		}
+		return failed
 	}).SetRetryCount(2)
 
 	var res OpenDoorResponse

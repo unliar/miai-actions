@@ -33,6 +33,8 @@ spec:
           env:
             - name: DOOR_ENV
               value: "DOOR_ENV_VALUE"
+            - name: BOT_API
+              value: "BOT_API_VALUE"
             - name: MICRO_REGISTRY
               value: "consul"
             - name: MICRO_REGISTRY_ADDRESS

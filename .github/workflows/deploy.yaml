@@ -46,6 +46,8 @@ jobs:
           sed -i "s#HAPPYIMAGE#$XIMAGE#g" ./chart/config.yaml
           sed -i "s#HAPPYREPO#${{ github.event.repository.name }}#g" ./chart/config.yaml
           sed -i "s#DOOR_ENV_VALUE#${{ secrets.DOOR_ENV }}#g" ./chart/config.yaml
+          sed -i "s#BOT_API_VALUE#${{ secrets.BOT_API }}#g" ./chart/config.yaml
+
 
 
       - name: k3s-apply-deployment
