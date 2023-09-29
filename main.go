@@ -27,7 +27,7 @@ func sub(client mqtt.Client, env *DoorEnv) {
 			fmt.Println("关门指令触发")
 			return
 		}
-		fmt.Printf("收到其他指令消息:" + payload)
+		fmt.Printf("t收到其他指令消息:" + payload)
 	}); token.Wait() && token.Error() != nil {
 		fmt.Println("订阅失败")
 		panic(token.Error())
