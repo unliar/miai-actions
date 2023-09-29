@@ -34,19 +34,19 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - sh
-                  - "-c"
-                  - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=✅%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务启动" || true
-            preStop:
-              exec:
-                command:
-                  - sh
-                  - "-c"
-                  - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=❌%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务移除" || true
+          # lifecycle:
+          #   postStart:
+          #     exec:
+          #       command:
+          #         - sh
+          #         - "-c"
+          #         - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=✅%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务启动" || true
+          #   preStop:
+          #     exec:
+          #       command:
+          #         - sh
+          #         - "-c"
+          #         - wget --output-document=/dev/null "https://happysooner.com/api/v1/push/wechat-work-robot?title=❌%20$(hostname)&desc=位于节点**${MICRO_NODE_NAME}**的服务移除" || true
 
 ---
 apiVersion: v1
