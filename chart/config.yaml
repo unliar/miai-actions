@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: HAPPYREPO
-  replicas: 2
+  replicas: 1
   minReadySeconds: 5 # 最短应用就绪时间 pod 启动10s后才认为应用可以接受请求。
   strategy:
     type: RollingUpdate # 滚动更新
