@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: HAPPYREPO
-  replicas: 1
+  replicas: 2
   minReadySeconds: 5 # 最短应用就绪时间 pod 启动10s后才认为应用可以接受请求。
   strategy:
     type: RollingUpdate # 滚动更新
@@ -21,15 +21,6 @@ spec:
       containers:
         - name: HAPPYREPO
           image: HAPPYIMAGE
-          ports:
-            - containerPort: 8088
-          resources:
-            requests: # 资源分配下限
-              cpu: "20m"
-              memory: "50Mi"
-            limits: # 资源分配上限
-              memory: "128Mi" # 内存限制
-              cpu: "500m" # 限制cpu
           env:
             - name: DOOR_ENV
               value: "DOOR_ENV_VALUE"
