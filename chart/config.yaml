@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: HAPPYREPO
 spec:
+  revisionHistoryLimit: 0
   selector:
     matchLabels:
       app: HAPPYREPO
