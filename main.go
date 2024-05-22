@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"miai-open-the-door/actions"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -34,7 +36,26 @@ func sub(client mqtt.Client, env *DoorEnv) {
 	}
 	fmt.Println("订阅成功")
 }
+func checkConnection(client mqtt.Client, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
+	for {
+		select {
+		case <-ticker.C:
+			if !client.IsConnected() {
+				fmt.Println("MQTT连接已断开，尝试重新连接...")
+				if token := client.Connect(); token.Wait() && token.Error() != nil {
+					fmt.Printf("重新连接失败: %v\n", token.Error())
+				} else {
+					fmt.Println("重新连接成功")
+				}
+			} else {
+				fmt.Println("MQTT连接正常")
+			}
+		}
+	}
+}
 func main() {
 	// 获取配置
 	env, err := GetDoorEnv()
@@ -52,12 +73,12 @@ func main() {
 	opts.KeepAlive = 60
 	opts.OnReconnecting = func(client mqtt.Client, options *mqtt.ClientOptions) {
 		fmt.Printf("mqtt服务 重连... \n")
-		sub(client,env)
+		sub(client, env)
 	}
 	// 连接成功
 	opts.OnConnect = func(client mqtt.Client) {
 		fmt.Printf("mqtt服务 连接成功 \n")
-		sub(client,env)
+		sub(client, env)
 	}
 	// 连接丢失
 	opts.OnConnectionLost = func(client mqtt.Client, err error) {
@@ -72,8 +93,18 @@ func main() {
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
+	// 启动检查连接的goroutine
+	go checkConnection(client, 30*time.Second)
 
-	c := make(chan os.Signal)
-	s := <-c
-	fmt.Println("退出", s)
+	// 监听OS信号
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+	for {
+		s := <-c
+		fmt.Println("退出", s)
+		client.Disconnect(1000)
+
+		fmt.Println("已断开连接")
+	}
+
 }
